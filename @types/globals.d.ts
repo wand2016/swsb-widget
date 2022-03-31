@@ -4,6 +4,7 @@ declare namespace NodeJS {
   interface ProcessEnv {
     readonly CONSUMER_KEY: string;
     readonly CONSUMER_SECRET: string;
+    readonly BEARER_TOKEN: string;
     readonly ACCESS_TOKEN_KEY: string;
     readonly ACCESS_TOKEN_SECRET: string;
 

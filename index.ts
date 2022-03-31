@@ -1,39 +1,8 @@
 require("dotenv").config();
-import twitter from "twitter";
+import { TwitterApi } from "twitter-api-v2";
 import Pusher from "pusher";
 
-type Tweet = {
-  created_at: string;
-  id: number;
-  id_str: string;
-  text: string;
-  source: string;
-  truncated: boolean;
-  in_reply_to_status_id: number | null;
-  in_reply_to_status_id_str: string | null;
-  in_reply_to_user_id: number | null;
-  in_reply_to_user_id_str: string | null;
-  in_reply_to_screen_name: string | null;
-  user: {
-    id: number;
-    id_str: string;
-    name: string;
-    screen_name: string;
-    location: string | null;
-    url: string | null;
-    description: string;
-    translator_type: string;
-    profile_image_url_https: string;
-  };
-  timestamp_ms: string;
-};
-
-const twit = new twitter({
-  consumer_key: process.env.CONSUMER_KEY,
-  consumer_secret: process.env.CONSUMER_SECRET,
-  access_token_key: process.env.ACCESS_TOKEN_KEY,
-  access_token_secret: process.env.ACCESS_TOKEN_SECRET,
-});
+const client = new TwitterApi(process.env.BEARER_TOKEN).v2;
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID,
@@ -43,35 +12,81 @@ const pusher = new Pusher({
   useTLS: true,
 });
 
-const keywords = [
-  "SWSB",
-  "サンリオワールドスマッシュボール",
-  "サンリオスマッシュボール",
-  "サワスボ",
-  "#エバリブーを救いたい",
-];
+(async () => {
+  await deleteAllRules();
+  await applyRules();
 
-/**
- * comma means OR. {@see https://developer.twitter.com/en/docs/twitter-api/v1/tweets/filter-realtime/guides/basic-stream-parameters}
- */
-const track = keywords.join(",");
-
-twit.stream("statuses/filter", { track }, (stream) => {
-  stream.on("data", async (data: Tweet) => {
-    const id = data.id_str;
-    const iconUrl = data.user.profile_image_url_https;
-    const name = data.user.name;
-    const screenName = data.user.screen_name;
-    const text = data.text;
-
-    await pusher.trigger("swsb", "tweet", {
-      id,
-      iconUrl,
-      name,
-      screenName,
-      text,
+  try {
+    const stream = await client.searchStream({
+      autoConnect: true,
+      expansions: ["author_id"],
+      "user.fields": ["id", "name", "username", "profile_image_url"],
     });
+    console.log("hoge2");
 
-    console.log(".");
+    for await (const { data, includes } of stream) {
+      const author = (includes?.users ?? [])[0];
+      const id = data.id;
+      const iconUrl = author.profile_image_url;
+      const name = author.name;
+      const screenName = author.username;
+      const text = data.text;
+
+      const payload = {
+        id,
+        iconUrl,
+        name,
+        screenName,
+        text,
+      };
+
+      console.log(".");
+      await pusher.trigger("swsb", "tweet", payload);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+})();
+
+async function deleteAllRules() {
+  const rules = (await client.streamRules()).data ?? [];
+  if (rules.length === 0) {
+    console.log("no rules.");
+    return;
+  }
+
+  const ids = rules.map((rule) => rule.id);
+  console.log("delete rules: ", ids);
+
+  await client.updateStreamRules({
+    delete: {
+      ids,
+    },
   });
-});
+}
+
+async function applyRules() {
+  console.log("apply rules");
+  const keywords = [
+    "SWSB",
+    "サンリオワールドスマッシュボール",
+    "サンリオスマッシュボール",
+    "サワスボ",
+    "#エバリブーを救いたい",
+  ];
+
+  const updatedRules = await client.updateStreamRules({
+    add: [
+      {
+        value: keywords
+          .map((keyword) => `(${keyword} -is:retweet)`)
+          .join(" OR "),
+      },
+    ],
+  });
+  console.log("rules:", JSON.stringify(updatedRules, null, 2));
+}
+
+function sleep(millisec: number) {
+  return new Promise((resolve) => setTimeout(resolve, millisec));
+}
