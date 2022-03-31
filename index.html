@@ -27,6 +27,10 @@
         const [tweets, setTweets] = useState([]);
         const containerRef = useRef(null);
 
+        const handleData = (data) => {
+          setTweets((tweets) => [data, ...tweets]);
+        };
+
         useEffect(() => {
           // Enable pusher logging
           Pusher.logToConsole = true;
@@ -36,10 +40,14 @@
           });
 
           const channel = pusher.subscribe("swsb");
-          channel.bind("tweet", function (data) {
-            setTweets([data, ...tweets]);
-          });
-        });
+          channel.bind("tweet", handleData);
+
+          return () => {
+            channel.unbind("tweet", handleData);
+          };
+        }, [handleData]);
+
+        const addTweet = (tweet) => {};
 
         const {
           Avatar,
