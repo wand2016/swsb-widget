@@ -16,35 +16,30 @@ const pusher = new Pusher({
   await deleteAllRules();
   await applyRules();
 
-  try {
-    const stream = await client.searchStream({
-      autoConnect: true,
-      expansions: ["author_id"],
-      "user.fields": ["id", "name", "username", "profile_image_url"],
-    });
-    console.log("hoge2");
+  const stream = await client.searchStream({
+    autoConnect: true,
+    expansions: ["author_id"],
+    "user.fields": ["id", "name", "username", "profile_image_url"],
+  });
 
-    for await (const { data, includes } of stream) {
-      const author = (includes?.users ?? [])[0];
-      const id = data.id;
-      const iconUrl = author.profile_image_url;
-      const name = author.name;
-      const screenName = author.username;
-      const text = data.text;
+  for await (const { data, includes } of stream) {
+    const author = (includes?.users ?? [])[0];
+    const id = data.id;
+    const iconUrl = author.profile_image_url;
+    const name = author.name;
+    const screenName = author.username;
+    const text = data.text;
 
-      const payload = {
-        id,
-        iconUrl,
-        name,
-        screenName,
-        text,
-      };
+    const payload = {
+      id,
+      iconUrl,
+      name,
+      screenName,
+      text,
+    };
 
-      console.log(".");
-      await pusher.trigger("swsb", "tweet", payload);
-    }
-  } catch (e) {
-    console.error(e);
+    console.log(".");
+    await pusher.trigger("swsb", "tweet", payload);
   }
 })();
 
