@@ -1,0 +1,7 @@
+{
+  "name": "swsb-widget",
+  "description": "obs browser source widget for SWSB tweets",
+  "repository": "https://github.com/wand2016/swsb-widget",
+  "keywords": ["node", "swsb", "twitter"],
+  "image": "heroku/nodejs"
+}
