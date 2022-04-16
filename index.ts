@@ -63,11 +63,12 @@ async function deleteAllRules() {
 async function applyRules() {
   console.log("apply rules");
   const keywords = [
-    "SWSB",
-    "サンリオワールドスマッシュボール",
-    "サンリオスマッシュボール",
-    "サワスボ",
-    "#エバリブーを救いたい",
+    // "SWSB",
+    // "サンリオワールドスマッシュボール",
+    // "サンリオスマッシュボール",
+    // "サワスボ",
+    // "#エバリブーを救いたい",
+    "#SWSB全国大会",
   ];
 
   const updatedRules = await client.updateStreamRules({
