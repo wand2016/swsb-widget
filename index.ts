@@ -1,3 +1,5 @@
+import censor from "./censor";
+
 require("dotenv").config();
 import { TwitterApi } from "twitter-api-v2";
 import Pusher from "pusher";
@@ -33,9 +35,9 @@ const pusher = new Pusher({
     const payload = {
       id,
       iconUrl,
-      name,
-      screenName,
-      text,
+      name: censor(name),
+      screenName: censor(screenName),
+      text: censor(text),
     };
 
     console.log(".");
