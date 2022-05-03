@@ -124,7 +124,7 @@ const list = [
 
 function censor(text: string): string {
   const pattern = list
-    .map((element) => decodeURIComponent(atob(element)))
+    .map((e) => decodeURIComponent(Buffer.from(e, "base64").toString()))
     .concat(["わこつ", "なるほどです"]) // ついでに処す
     .join("|");
   const regex = new RegExp(pattern, "ig");
