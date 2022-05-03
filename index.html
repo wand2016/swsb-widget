@@ -47,16 +47,8 @@
           };
         }, [handleData]);
 
-        const {
-          Avatar,
-          Box,
-          Card,
-          CardHeader,
-          CardContent,
-          List,
-          Slide,
-          Typography,
-        } = MaterialUI;
+        const { Box, Card, CardHeader, CardContent, List, Slide, Typography } =
+          MaterialUI;
 
         return (
           <Box
@@ -77,7 +69,6 @@
                   >
                     <Card sx={{ margin: 1 }}>
                       <CardHeader
-                        avatar={<Avatar alt={"icon"} src={tweet.iconUrl} />}
                         title={tweet.name}
                         subheader={`@${tweet.screenName}`}
                       />
