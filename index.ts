@@ -82,7 +82,3 @@ async function applyRules() {
   });
   console.log("rules:", JSON.stringify(updatedRules, null, 2));
 }
-
-function sleep(millisec: number) {
-  return new Promise((resolve) => setTimeout(resolve, millisec));
-}
