@@ -21,15 +21,15 @@
     ></script>
     <script></script>
     <script type="text/babel">
-      const { useState, useEffect, useRef } = React;
+      const { useState, useEffect, useRef, useCallback } = React;
 
       const App = () => {
         const [tweets, setTweets] = useState([]);
         const containerRef = useRef(null);
 
-        const handleData = (data) => {
+        const handleData = useCallback((data) => {
           setTweets((tweets) => [data, ...tweets]);
-        };
+        }, [setTweets]);
 
         useEffect(() => {
           // Enable pusher logging
